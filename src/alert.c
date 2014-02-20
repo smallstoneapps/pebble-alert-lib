@@ -49,6 +49,8 @@ static void alert_end(void *data)
 
 	//Incase of repeat
 	app_timer_cancel(alert_lib_timer);
+
+	alert_lib_is_visible = false;
 }
 
 /*
@@ -83,35 +85,41 @@ static void alert_bg_update_proc(Layer *layer, GContext *ctx)
  */
 void alert_show(Window *window, const char *title, const char *body, const int duration)
 {	
-	//Show background
-	alert_lib_background_layer = layer_create(GRect(5, 5, 129, 132));
-	layer_set_update_proc(alert_lib_background_layer, alert_bg_update_proc);
-	layer_add_child(window_get_root_layer(window), alert_lib_background_layer);
+	//Prevent dereferencing on multiple spawns
+	if(alert_lib_is_visible == false)
+	{
+		//Show background
+		alert_lib_background_layer = layer_create(GRect(5, 5, 129, 132));
+		layer_set_update_proc(alert_lib_background_layer, alert_bg_update_proc);
+		layer_add_child(window_get_root_layer(window), alert_lib_background_layer);
 
-	//Show title
-	alert_lib_title_layer = text_layer_create(GRect(10, 15, 124, 30));
-	text_layer_set_text_color(alert_lib_title_layer, GColorBlack);
-	text_layer_set_background_color(alert_lib_title_layer, GColorClear);
-	text_layer_set_font(alert_lib_title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	text_layer_set_text_alignment(alert_lib_title_layer, GTextAlignmentCenter);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(alert_lib_title_layer));
+		//Show title
+		alert_lib_title_layer = text_layer_create(GRect(10, 15, 124, 30));
+		text_layer_set_text_color(alert_lib_title_layer, GColorBlack);
+		text_layer_set_background_color(alert_lib_title_layer, GColorClear);
+		text_layer_set_font(alert_lib_title_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+		text_layer_set_text_alignment(alert_lib_title_layer, GTextAlignmentCenter);
+		layer_add_child(window_get_root_layer(window), text_layer_get_layer(alert_lib_title_layer));
 
-	//Show body
-	alert_lib_body_layer = text_layer_create(GRect(20, 40, 104, 112));
-	text_layer_set_text_color(alert_lib_body_layer, GColorBlack);
-	text_layer_set_background_color(alert_lib_body_layer, GColorClear);
-	text_layer_set_text_alignment(alert_lib_body_layer, GTextAlignmentLeft);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(alert_lib_body_layer));
+		//Show body
+		alert_lib_body_layer = text_layer_create(GRect(20, 40, 104, 112));
+		text_layer_set_text_color(alert_lib_body_layer, GColorBlack);
+		text_layer_set_background_color(alert_lib_body_layer, GColorClear);
+		text_layer_set_text_alignment(alert_lib_body_layer, GTextAlignmentLeft);
+		layer_add_child(window_get_root_layer(window), text_layer_get_layer(alert_lib_body_layer));
 
-	//Set text
-	snprintf(alert_lib_title_buffer, (alert_strlen(title) * sizeof(char) + 1), "%s", title);
-	text_layer_set_text(alert_lib_title_layer, alert_lib_title_buffer);
+		//Set text
+		snprintf(alert_lib_title_buffer, (alert_strlen(title) * sizeof(char) + 1), "%s", title);
+		text_layer_set_text(alert_lib_title_layer, alert_lib_title_buffer);
 
-	snprintf(alert_lib_body_buffer, (alert_strlen(body) * sizeof(char) + 1), "%s", body);
-	text_layer_set_text(alert_lib_body_layer, alert_lib_body_buffer);
+		snprintf(alert_lib_body_buffer, (alert_strlen(body) * sizeof(char) + 1), "%s", body);
+		text_layer_set_text(alert_lib_body_layer, alert_lib_body_buffer);
 
-	//Register timer
-	alert_lib_timer = app_timer_register(duration, alert_end, NULL);
+		//Register timer
+		alert_lib_timer = app_timer_register(duration, alert_end, NULL);
+
+		alert_lib_is_visible = true;
+	}
 }
 
 /*
@@ -124,22 +132,28 @@ void alert_show(Window *window, const char *title, const char *body, const int d
  */
 void alert_update(const char *new_title, const char *new_body, const int new_duration)
 {
-	//Set text
-	snprintf(alert_lib_title_buffer, (alert_strlen(new_title) * sizeof(char) + 1), "%s", new_title);
-	text_layer_set_text(alert_lib_title_layer, alert_lib_title_buffer);
+	if(alert_lib_is_visible == true)
+	{
+		//Set text
+		snprintf(alert_lib_title_buffer, (alert_strlen(new_title) * sizeof(char) + 1), "%s", new_title);
+		text_layer_set_text(alert_lib_title_layer, alert_lib_title_buffer);
 
-	snprintf(alert_lib_body_buffer, (alert_strlen(new_body) * sizeof(char) + 1), "%s", new_body);
-	text_layer_set_text(alert_lib_body_layer, alert_lib_body_buffer);
+		snprintf(alert_lib_body_buffer, (alert_strlen(new_body) * sizeof(char) + 1), "%s", new_body);
+		text_layer_set_text(alert_lib_body_layer, alert_lib_body_buffer);
 
-	//New duration
-	app_timer_cancel(alert_lib_timer);
-	alert_lib_timer = app_timer_register(new_duration, alert_end, NULL);
+		//New duration
+		app_timer_cancel(alert_lib_timer);
+		alert_lib_timer = app_timer_register(new_duration, alert_end, NULL);
+	}
 }
 
 /*
- * Cancel an existing alert. Concenience due to callback argument
+ * Cancel an existing alert. Convenience due to callback argument
  */
 void alert_cancel()
 {
-	alert_end(NULL);	//NULL - signature requirement
+	if(alert_lib_is_visible == true)
+	{
+		alert_end(NULL);	//NULL - signature requirement
+	}
 }

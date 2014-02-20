@@ -17,6 +17,9 @@
 char alert_lib_title_buffer[32];
 char alert_lib_body_buffer[64];
 
+//State
+bool alert_lib_is_visible;
+
 //Library objects
 AppTimer *alert_lib_timer;
 TextLayer *alert_lib_title_layer, *alert_lib_body_layer;
