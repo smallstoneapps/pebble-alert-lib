@@ -3,6 +3,8 @@ pebble-alert-lib
 
 Source code for a simple alert mechanism for Pebble apps.
 
+![alt text](res/example_screenshot.png "Example Screenshot")
+
 Instructions for Use:
 ---------------------
 
