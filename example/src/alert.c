@@ -7,6 +7,26 @@
 
 #include "alert.h"
 
+//Library constants
+#define MAX_ALERT_STRLEN_LENGTH 64	//For safety - largest string allowed in buffers
+
+//Library buffers
+static char alert_lib_title_buffer[32];
+static char alert_lib_body_buffer[64];
+
+//State
+static bool alert_lib_is_visible;
+
+//Library objects
+static AppTimer *alert_lib_timer;
+static TextLayer *alert_lib_title_layer, *alert_lib_body_layer;
+static Layer *alert_lib_background_layer;
+
+//Function prototypes
+static int alert_strlen(const char *string);
+static void alert_end(void *data);
+static void alert_bg_update_proc(Layer *layer, GContext *ctx);
+
 /*
  * Get length of a string
  *
@@ -16,7 +36,7 @@
  * Returns:
  * Length of the string
  */
-int alert_strlen(const char *string)
+static int alert_strlen(const char *string)
 {
 	int length = 0;
 	for(int i = 0; i < MAX_ALERT_STRLEN_LENGTH; i++)
