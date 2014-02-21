@@ -1,7 +1,7 @@
 /*********************************************************************/
 /* Simple alert mechanism for Pebble apps                            */
 /* Author: Chris Lewis                                               */
-/* Modified: 20/02/14                                                */
+/* Modified: 21/02/14                                                */
 /* Freely available to use with link to https://github.com/C-D-Lewis */
 /*********************************************************************/
 
@@ -176,4 +176,15 @@ void alert_cancel()
 	{
 		alert_end(NULL);	//NULL - signature requirement
 	}
+}
+
+/*
+ * Tell the parent app if the alert is currently visible
+ *
+ * Returns
+ * bool: True if the alert is still visible
+ */
+bool alert_is_visible()
+{
+	return alert_lib_is_visible;
 }
