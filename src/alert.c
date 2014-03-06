@@ -135,11 +135,25 @@ void alert_show(Window *window, const char *title, const char *body, const int d
 		snprintf(alert_lib_body_buffer, (alert_strlen(body) * sizeof(char) + 1), "%s", body);
 		text_layer_set_text(alert_lib_body_layer, alert_lib_body_buffer);
 
-		//Register timer
-		alert_lib_timer = app_timer_register(duration, alert_end, NULL);
+		if (duration >= 0) {
+			//Register timer
+			alert_lib_timer = app_timer_register(duration, alert_end, NULL);
+		}
 
 		alert_lib_is_visible = true;
 	}
+}
+
+/*
+ * Create and show an alert that does not disappear automatically
+ *
+ * Arguments:
+ * Window     *window: The parent window from the Pebble application
+ * const char  *title: The alert title
+ * const char   *body: The alert body message
+ */
+void alert_show_sticky(Window *window, const char *title, const char *body) {
+	alert_show(window, title, body, -1);
 }
 
 /*
